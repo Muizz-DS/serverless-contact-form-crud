@@ -24,25 +24,35 @@ func init() {
 }
 
 
-func DeleteTodo(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	fmt.Println("DeleteTodo")
+func CompleteContact(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	fmt.Println("CompleteContact")
 
 	// Parse id from request body
 	var (
 		id = request.PathParameters["id"]
-		tableName = aws.String(os.Getenv("TODOS_TABLE_NAME"))
+		tableName = aws.String(os.Getenv("CONTACTS_TABLE_NAME"))
 	)
 
-	// Delete todo
-	input := &dynamodb.DeleteItemInput{
+	// Update row
+	input := &dynamodb.UpdateItemInput{
 		Key: map[string]*dynamodb.AttributeValue{
 			"id": {
 				S: aws.String(id),
 			},
 		},
+		UpdateExpression: aws.String("set #d = :d"),
+		ExpressionAttributeNames: map[string]*string{
+			//"#d": &done,
+		},
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":d": {
+				BOOL: aws.Bool(true),
+			},
+		},
+		ReturnValues:     aws.String("UPDATED_NEW"),
 		TableName: tableName,
 	}
-	_, err := ddb.DeleteItem(input)
+	_, err := ddb.UpdateItem(input)
 
 	if err != nil {
 		return events.APIGatewayProxyResponse{ // Error HTTP response
@@ -51,11 +61,12 @@ func DeleteTodo(ctx context.Context, request events.APIGatewayProxyRequest) (eve
 		}, nil
 	} else {
 		return events.APIGatewayProxyResponse{ // Success HTTP response
-			StatusCode: 204,
+			Body: request.Body,
+			StatusCode: 200,
 		}, nil
 	}
 }
 
 func main() {
-	lambda.Start(DeleteTodo)
+	lambda.Start(CompleteContact)
 }

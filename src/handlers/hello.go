@@ -7,7 +7,7 @@ import (
 )
 
 func hello(ctx context.Context, name string) (string, error) {
-	return fmt.Sprintf("hello %s", name), nil
+    return fmt.Sprintf("hello %s", name), nil
 }
 
 func main() {

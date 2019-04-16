@@ -14,15 +14,16 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
-type Todo struct {
+type Contact struct {
 	ID          string  `json:"id"`
-	Description string 	`json:"description"`
-	Done        bool   	`json:"done"`
+	Name string 	`json:"name"`
+	Email string 	`json:"email"`
+	PhoneNumber string 	`json:"phone_number"`
 	CreatedAt   string 	`json:"created_at"`
 }
 
-type ListTodosResponse struct {
-	Todos		[]Todo  `json:"todos"`
+type ListContactsResponse struct {
+	Contacts		[]Contact  `json:"contacts"`
 }
 
 var ddb *dynamodb.DynamoDB
@@ -37,11 +38,11 @@ func init() {
 	}
 }
 
-func ListTodos(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	fmt.Println("ListTodos")
+func ListContacts(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	fmt.Println("ListContacts")
 
 	var (
-		tableName = aws.String(os.Getenv("TODOS_TABLE_NAME"))
+		tableName = aws.String(os.Getenv("CONTACTS_TABLE_NAME"))
 	)
 
 	// Read from DynamoDB
@@ -50,20 +51,20 @@ func ListTodos(ctx context.Context, request events.APIGatewayProxyRequest) (even
 	}
 	result, _ := ddb.Scan(input)
 
-	// Construct todos from response
-	var todos []Todo
+	// Construct contacts from response
+	var contacts []Contact
 	for _, i := range result.Items {
-		todo := Todo{}
-		if err := dynamodbattribute.UnmarshalMap(i, &todo); err != nil {
+		contact := Contact{}
+		if err := dynamodbattribute.UnmarshalMap(i, &contact); err != nil {
 			fmt.Println("Failed to unmarshal")
 			fmt.Println(err)
 		}
-		todos = append(todos, todo)
+		contacts = append(contacts, contact)
 	}
 
 	// Success HTTP response
-	body, _ := json.Marshal(&ListTodosResponse{
-		Todos: todos,
+	body, _ := json.Marshal(&ListContactsResponse{
+		Contacts: contacts,
 	})
 	return events.APIGatewayProxyResponse{
 		Body: string(body),
@@ -72,5 +73,5 @@ func ListTodos(ctx context.Context, request events.APIGatewayProxyRequest) (even
 }
 
 func main() {
-	lambda.Start(ListTodos)
+	lambda.Start(ListContacts)
 }

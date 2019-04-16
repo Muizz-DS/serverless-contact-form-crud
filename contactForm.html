@@ -1,0 +1,92 @@
+<html>
+<head>
+
+<script
+  src="https://code.jquery.com/jquery-3.4.0.js"
+  integrity="sha256-DYZMCC8HTC+QDr5QNaIcfR7VSPtcISykd+6eSmBW5qo="
+  crossorigin="anonymous">
+/*const form = document.getElementById('contactForm')
+const url = 'https://gfq99349qg.execute-api.ap-southeast-1.amazonaws.com/dev/contacts'
+const toast = document.getElementById('toast')
+const submit = document.getElementById('submit')
+
+function post(url, body, callback) {
+    var req = new XMLHttpRequest();
+    req.open("POST", url, true);
+    req.setRequestHeader("Content-Type", "application/json");
+    req.addEventListener("load", function() {
+        if (req.status < 400) {
+            callback(null, JSON.parse(req.responseText));
+        } else {
+            callback(new Error("Request failed: " + req.statusText));
+        }
+    });
+    req.send(JSON.stringify(body));
+}
+    
+function success() {
+    toast.innerHTML = 'Thanks for sending contact info! Will get in touch with you within 5 minutes. :)'
+    submit.disabled = false
+    submit.blur()
+    form.name.focus()
+    form.name.value = ''
+    form.email.value = ''
+    form.content.value = ''
+}
+    
+function error (err) {
+    toast.innerHTML = 'There was an error sending contact info'
+    submit.disabled = false
+    console.log(err)
+}
+    
+form.addEventListener('submit', function (e) {
+    e.preventDefault()
+    toast.innerHTML = 'Sending'
+    submit.disabled = true
+    
+    const payload = {
+        name: form.name.value,
+        email: form.email.value,
+        phone_number: form.phone_number.value
+    }
+    
+    post(url, payload, function (err,res) {
+        if (err) { return error(err) }
+        success()
+    })
+}) */
+    $(document).ready(function (){
+        $('#send').click(function () {
+            var name = $('#name').val();
+            var email = $('#email').val();
+            var phone_number = $('#phone_number').val();
+            
+            var jsonData = {Name: name, Email: email, PhoneNumber: phone_number}; 
+            
+            $.ajax({
+                url: 'https://gfq99349qg.execute-api.ap-southeast-1.amazonaws.com/dev/contacts',
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify(jsonData),
+                success: function (result) {},
+                error: function (err) {}
+            });
+        });
+    });
+</script>
+</head>
+<body>
+<form id="contactForm">
+  <label>Name</label>
+  <input type="text" placeholder="Name" name="name" id="name" required>
+  <label>Email Address</label>
+  <input type="email" placeholder="Email Address" name="email" id="email" required>
+  <label>Phone Number</label>
+  <input type="number" placeholder="Phone Number" name="phone_number" id="phone_number" required>
+  <div id="toast"></div>
+  <button type="submit" id="send">Send</button>
+</form>
+</body>
+</html>

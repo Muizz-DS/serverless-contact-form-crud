@@ -11,11 +11,11 @@
 #
 # Happy Coding!
 
-service: serverless-crud-go
+service: contact-form-crud
 
 custom:
-  todosTableName: ${self:service}-${self:provider.stage}-todos
-  todosTableArn: # ARNs are addresses of deployed services in AWS space
+  contactsTableName: ${self:service}-${self:provider.stage}-contacts
+  contactsTableArn: # ARNs are addresses of deployed services in AWS space
     Fn::Join:
     - ":"
     - - arn
@@ -23,7 +23,7 @@ custom:
       - dynamodb
       - Ref: AWS::Region
       - Ref: AWS::AccountId
-      - table/${self:custom.todosTableName}
+      - table/${self:custom.contactsTableName}
 
 provider:
   name: aws
@@ -31,7 +31,7 @@ provider:
   stage: dev
   region: ap-southeast-1
   environment:
-    TODOS_TABLE_NAME: ${self:custom.todosTableName}
+    CONTACTS_TABLE_NAME: ${self:custom.contactsTableName}
   iamRoleStatements: # Defines what other AWS services our lambda functions can access
     - Effect: Allow # Allow access to DynamoDB tables
       Action:
@@ -41,7 +41,7 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource:
-        - ${self:custom.todosTableArn}
+        - ${self:custom.contactsTableArn}
 
 package:
  individually: true
@@ -59,56 +59,59 @@ functions:
           path: hello
           method: get
           cors: true
-  listTodos:
-    handler: bin/handlers/listTodos
+  listContacts:
+    handler: bin/handlers/listContacts
     package:
      include:
-       - ./bin/handlers/listTodos
+       - ./bin/handlers/listContacts
     events:
       - http:
-          path: todos
+          path: contacts
           method: get
           cors: true
-  addTodo:
-    handler: bin/handlers/addTodo
+  addContact:
+    handler: bin/handlers/addContact
     package:
       include:
-        - ./bin/handlers/addTodo
+        - ./bin/handlers/addContact
     events:
       - http:
-          path: todos
+          path: contacts
           method: post
           cors: true
-  completeTodo:
-    handler: bin/handlers/completeTodo
+    environment:
+        FUNCTION: addContact
+  completeContact:
+    handler: bin/handlers/completeContact
     package:
       include:
-        - ./bin/handlers/completeTodo
+        - ./bin/handlers/completeContact
     events:
       - http:
-          path: todos/{id}
+          path: contacts/{id}
           method: patch
           cors: true
-  deleteTodo:
-      handler: bin/handlers/deleteTodo
+  deleteContact:
+      handler: bin/handlers/deleteContact
       package:
         include:
-          - ./bin/handlers/deleteTodo
+          - ./bin/handlers/deleteContact
       events:
         - http:
-            path: todos/{id}
+            path: contacts/{id}
             method: delete
             cors: true
 
 resources:
   Resources: # Supporting AWS services
-    TodosTable: # Define a new DynamoDB Table resource to store todo items
+    ContactsTable: # Define a new DynamoDB Table resource to store contact items
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:custom.todosTableName}
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+        TableName: ${self:custom.contactsTableName}
+        BillingMode: PAY_PER_REQUEST
+#        ProvisionedThroughput:
+#          ReadCapacityUnits: 5
+#          WriteCapacityUnits: 5
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S

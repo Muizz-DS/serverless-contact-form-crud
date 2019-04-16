@@ -1,0 +1,7 @@
+ {
+    "id": {"S":"21345"},
+    "name": {"S": "New discussion thread"},
+    "email": {"S": "First post in this thread"},
+    "phone_number": {"S": "fred@example.com"},
+    "created_at": {"S":"eweqweqw"}
+}
